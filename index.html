@@ -3,17 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>iOS 26 Ultra-Smooth Drag</title>
+    <title>iOS 26 Liquid Spring Physics</title>
     <style>
         :root {
             --ios-blur: blur(60px) saturate(210%) brightness(1.1);
-            /* Apples geheime Kurve für 2026 */
-            --apple-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            background: #000 url('https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?q=80&w=1920&auto=format&fit=crop') center/cover;
+            background: #000 url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1920&auto=format&fit=crop') center/cover;
             font-family: -apple-system, sans-serif;
             overflow: hidden; display: flex; flex-direction: column;
             justify-content: center; align-items: center;
@@ -23,65 +21,62 @@
         .glass-canvas {
             position: absolute; inset: 0;
             backdrop-filter: var(--ios-blur); -webkit-backdrop-filter: var(--ios-blur);
-            background: rgba(255, 255, 255, 0.03); z-index: 1;
+            background: rgba(255, 255, 255, 0.05); z-index: 1;
         }
 
-        /* Haupt-Anzeige */
+        /* OBERES UI */
         .content-wrapper {
             position: relative; z-index: 10; width: 300px; height: 300px;
             overflow: hidden; border-radius: 65px;
-            mask-image: -webkit-radial-gradient(white, black); /* Fix für abgerundete Ecken & Blur */
         }
 
         .content-slider {
             display: flex; width: 300%; height: 100%;
-            transition: transform 0.8s var(--apple-ease);
+            /* Transform wird via JS gesteuert für maximale Smoothness */
         }
 
         .page {
             width: 100%; height: 100%; display: flex; justify-content: center;
             align-items: center; font-size: 7rem;
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.3));
         }
 
-        /* Navigations-Leiste */
+        /* NAVIGATION */
         .nav-container {
             position: relative; z-index: 20; margin-top: 60px;
             background: rgba(255, 255, 255, 0.08); padding: 8px;
-            border-radius: 40px; display: flex; gap: 0;
+            border-radius: 40px; display: flex;
             backdrop-filter: blur(30px); border: 0.5px solid rgba(255, 255, 255, 0.2);
-            width: 340px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            width: 340px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
         }
 
         .nav-item {
             flex: 1; padding: 18px 0; text-align: center;
             color: rgba(255, 255, 255, 0.3); font-weight: 600;
             font-size: 0.95rem; z-index: 25; pointer-events: none;
-            transition: color 0.4s ease, transform 0.4s var(--apple-ease);
+            transition: color 0.4s ease;
         }
 
-        .nav-item.active { color: white; transform: scale(1.05); }
+        .nav-item.active { color: white; }
 
-        /* Der Apple Liquid Regler */
+        /* LIQUID SPRING REGLER */
         .liquid-pill {
             position: absolute; top: 8px; left: 8px;
             height: calc(100% - 16px); width: 106px;
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.18);
             backdrop-filter: blur(15px) brightness(1.2);
             -webkit-backdrop-filter: blur(15px) brightness(1.2);
-            border: 0.5px solid rgba(255, 255, 255, 0.4);
+            border: 0.5px solid rgba(255, 255, 255, 0.5);
             border-radius: 32px; z-index: 22;
             cursor: grab;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            /* Keine Transition für 'left' beim Dragging, wir machen das per JS */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         .liquid-pill.active-state {
-            background: rgba(255, 255, 255, 0.25);
-            transform: scaleX(1.1) scaleY(1.05);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+            cursor: grabbing;
         }
-
     </style>
 </head>
 <body>
@@ -105,49 +100,55 @@
 
     <script>
         const pill = document.getElementById('pill');
-        const navBar = document.getElementById('navBar');
         const slider = document.getElementById('mainSlider');
         const items = document.querySelectorAll('.nav-item');
 
         let isDragging = false;
-        let targetX = 8;  // Wo der Regler hin will
-        let currentX = 8; // Wo der Regler gerade ist (für Glättung)
+        let targetX = 8;
+        let currentX = 8;
+        let velocity = 0;
         let dragOffset = 0;
 
-        // Die magische "Smooth-Follow" Funktion (Lerp)
-        function updatePhysic() {
-            // Jede Frame nähert sich currentX zu 15% an targetX an
-            let dx = targetX - currentX;
-            currentX += dx * 0.15; 
+        // Feder-Konstanten für den Apple-Bounce
+        const stiffness = 0.15; // Wie stark die Feder zieht
+        const damping = 0.75;   // Wie schnell sie aufhört zu schwingen
+
+        function update() {
+            if (!isDragging) {
+                // Spring Physics: Kraft = (Ziel - Position) * Steifigkeit
+                let force = (targetX - currentX) * stiffness;
+                velocity += force;
+                velocity *= damping;
+                currentX += velocity;
+            } else {
+                // Beim Ziehen folgt der Regler direkt, aber leicht gedämpft
+                let dx = targetX - currentX;
+                currentX += dx * 0.4;
+                velocity = 0;
+            }
 
             pill.style.left = currentX + 'px';
-
-            // Fortschritt für den Slider oben berechnen (0 bis 220px)
+            
+            // Slider oben synchronisieren
             let progress = (currentX - 8) / 212;
             slider.style.transform = `translateX(-${progress * 66.666}%)`;
 
-            requestAnimationFrame(updatePhysic);
+            requestAnimationFrame(update);
         }
-        updatePhysic(); // Startet die Physik-Engine
+        update();
 
         function onStart(e) {
             isDragging = true;
             pill.classList.add('active-state');
-            const clientX = e.pageX || e.touches[0].pageX;
-            dragOffset = clientX - currentX;
+            const x = e.pageX || e.touches[0].pageX;
+            dragOffset = x - currentX;
         }
 
         function onMove(e) {
             if (!isDragging) return;
-            const clientX = e.pageX || e.touches[0].pageX;
-            let x = clientX - dragOffset;
-
-            // Grenzen einhalten
-            const maxX = navBar.offsetWidth - pill.offsetWidth - 8;
-            if (x < 8) x = 8;
-            if (x > maxX) x = maxX;
-
-            targetX = x; // Wir setzen nur das Ziel, die Physik macht den Rest
+            const x = (e.pageX || e.touches[0].pageX) - dragOffset;
+            const maxX = 224; // navBar width - pill width - margin
+            targetX = Math.max(8, Math.min(x, maxX));
         }
 
         function onEnd() {
@@ -155,20 +156,21 @@
             isDragging = false;
             pill.classList.remove('active-state');
 
-            // Snapping: Welcher Bereich ist am nächsten?
+            // Snapping Positionen
             if (targetX < 60) targetX = 8;
             else if (targetX < 165) targetX = 114;
             else targetX = 224;
 
-            // Active State Text
             const index = targetX === 8 ? 0 : (targetX === 114 ? 1 : 2);
             items.forEach((item, i) => item.classList.toggle('active', i === index));
+            
+            // Ein kleiner haptischer "Kick" beim Loslassen (falls unterstützt)
+            if (window.navigator.vibrate) window.navigator.vibrate(10);
         }
 
         pill.addEventListener('mousedown', onStart);
         window.addEventListener('mousemove', onMove);
         window.addEventListener('mouseup', onEnd);
-
         pill.addEventListener('touchstart', onStart);
         window.addEventListener('touchmove', onMove, { passive: false });
         window.addEventListener('touchend', onEnd);
