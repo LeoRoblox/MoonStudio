@@ -3,156 +3,262 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liquid Glass Effect MacOS Dock</title>
-    
+    <title>Apex Panel PRO</title>
     <style>
-        /* --- CSS SKRIPT START --- */
-        
-        /* LIQUID GLASS STYLES */
+        /* CSS von Maxuiux & Anpassungen */
+        html {
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: inherit;
+        }
+
+        body {
+            font-family: "Inter", sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #000; /* Startet schwarz */
+            color: white;
+            overflow: hidden;
+            transition: background-color 0.1s ease;
+        }
+
+        /* Titel oben links mit Mond */
+        .top-title {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .moon-icon {
+            width: 24px;
+            height: 24px;
+            /* SVG Mond Design */
+            background-color: white;
+            mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>') no-repeat center;
+            -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>') no-repeat center;
+        }
+
+        /* Liquid Glass Frame - Größer */
         .liquidGlass-wrapper {
             position: relative;
-            display: flex;
-            font-weight: 600;
+            width: 500px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 40px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
             overflow: hidden;
-            box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.1);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .liquidGlass-effect {
             position: absolute;
+            inset: 0;
             z-index: 0;
-            inset: 0;
-            backdrop-filter: blur(3px);
             filter: url(#glass-distortion);
-            overflow: hidden;
         }
 
-        .liquidGlass-tint {
+        /* Content im Glass */
+        .content {
+            position: relative;
+            z-index: 10;
+        }
+
+        .product-image {
+            width: 100%;
+            border-radius: 20px;
+            margin-bottom: 25px;
+        }
+
+        .info-panel {
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .info-panel span {
+            color: #49a3fc;
+            font-weight: bold;
+        }
+
+        /* Slider Bereich */
+        .slider-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 25px;
+        }
+
+        .slider-label {
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            text-align: left;
+        }
+
+        .slider-container {
+            position: relative;
+            width: 100%;
+            height: 10px;
+            background: #333;
+            border-radius: 999px;
+        }
+
+        .slider-progress {
+            position: absolute;
+            height: 100%;
+            background: linear-gradient(117deg, #49a3fc 0%, #3681ee 100%);
+            border-radius: 999px;
+            width: 0%;
             z-index: 1;
+        }
+
+        .slider-thumb-glass {
             position: absolute;
-            inset: 0;
-            background: rgba(255, 255, 255, 0.50);
-        }
-
-        .liquidGlass-shine {
-            position: absolute;
-            inset: 0;
-            z-index: 2;
-            overflow: hidden;
-            box-shadow: inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5),
-                        inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5);
-        }
-
-        .liquidGlass-text {
-            z-index: 3;
-            font-size: 2rem;
-            color: black;
-        }
-
-        /* OTHER STYLES */
-        body {
-            padding: 0;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background: url("https://media.istockphoto.com/id/1430511443/vector/christmas-mistletoe-foliage-and-berries-vector-seamless-pattern.jpg?s=612x612&w=0&k=20&c=oqxlH7ytgd5yjBQroACirJ1gH7Au1tq8gmsdeGd-Crk=") center center;
-            background-size: 500px;
-            font-family: sans-serif;
-            font-weight: 300;
-            animation: moveBackground 60s linear infinite;
-        }
-
-        a {
-            text-decoration: none;
-        }
-
-        .wrapper {
-            display: flex;
-            gap: 25px;
-            flex-direction: column;
-            justify-content: center;
-            align-items: flex-end;
-        }
-
-        .dock {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            border-radius: 2rem;
-            padding: 0.6rem;
-        }
-
-        .dock,
-        .dock > div {
-            border-radius: 2rem;
-        }
-
-        .dock:hover {
-            padding: 0.8rem;
-            border-radius: 2.5rem;
-        }
-        
-        .dock:hover > div {
-            border-radius: 2.5rem;
-        }
-
-        .dock img {
-            width: 75px;
-            padding: 0;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 65px;
+            height: 42px;
+            border-radius: 999px;
             cursor: pointer;
+            z-index: 2;
+            background-color: #fff;
+            box-shadow: 0 1px 8px rgba(0,0,0,0.3);
+            overflow: hidden;
+            transition: transform 0.15s ease;
         }
 
-        .dock img:hover {
-            transform: scale(0.95);
-            transform-origin: center center;
+        .slider-thumb-glass-filter {
+            position: absolute; inset: 0; z-index: 0;
+            backdrop-filter: blur(0.6px);
+            filter: url(#mini-liquid-lens);
         }
 
-        @keyframes moveBackground {
-            from { background-position: 0% 0%; }
-            to { background-position: 0% -1500%; }
+        .slider-thumb-glass-specular {
+            position: absolute; inset: 0; z-index: 2;
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.5);
         }
-        /* --- CSS SKRIPT ENDE --- */
+
+        .slider-thumb-glass.active { background-color: transparent; }
+        .slider-thumb-glass-filter, .slider-thumb-glass-specular { opacity: 0; }
+        .slider-thumb-glass.active .slider-thumb-glass-filter,
+        .slider-thumb-glass.active .slider-thumb-glass-specular { opacity: 1; }
+
+        /* SVG Filter Hide */
+        .hidden-svg { position: absolute; width: 0; height: 0; pointer-events: none; }
     </style>
 </head>
-<body>
+<body id="bg">
 
-    <div class="wrapper">
-        <div class="liquidGlass-wrapper dock">
-            <div class="liquidGlass-effect"></div>
-            <div class="liquidGlass-tint"></div>
-            <div class="liquidGlass-shine"></div>
-            <div class="liquidGlass-text">
-                <div class="dock">
-                    <img src="https://raw.githubusercontent.com/lucasromerodb/liquid-glass-effect-macos/refs/heads/main/assets/finder.png" alt="Finder" />
-                    <img src="https://raw.githubusercontent.com/lucasromerodb/liquid-glass-effect-macos/refs/heads/main/assets/map.png" alt="Maps" />
-                    <img src="https://raw.githubusercontent.com/lucasromerodb/liquid-glass-effect-macos/refs/heads/main/assets/messages.png" alt="Messages" />
-                    <img src="https://raw.githubusercontent.com/lucasromerodb/liquid-glass-effect-macos/refs/heads/main/assets/notes.png" alt="Notes" />
-                    <img src="https://raw.githubusercontent.com/lucasromerodb/liquid-glass-effect-macos/refs/heads/main/assets/safari.png" alt="Safari" />
-                    <img src="https://raw.githubusercontent.com/lucasromerodb/liquid-glass-effect-macos/refs/heads/main/assets/books.png" alt="Books" />
+    <div class="top-title">
+        <div class="moon-icon"></div>
+        ApexOS Control
+    </div>
+
+    <div class="liquidGlass-wrapper">
+        <div class="liquidGlass-effect"></div>
+        
+        <div class="content">
+            <img src="https://i.postimg.cc/T3PzWp8N/Apex-Panel-PRO.jpg" alt="Apex Panel PRO" class="product-image">
+            
+            <div class="info-panel">
+                Product: <span>ApexPanel</span><br>
+                Version: <span>ApexOS 1</span><br>
+                Product Cost: <span>100 Robux</span><br>
+                Release date: <span>2026</span>
+            </div>
+
+            <div class="slider-section">
+                <div class="slider-label">Background:</div>
+                <div class="slider-container" id="slider">
+                    <div class="slider-progress" id="progress"></div>
+                    <div class="slider-thumb-glass" id="thumb">
+                        <div class="slider-thumb-glass-filter"></div>
+                        <div class="slider-thumb-glass-specular"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <svg style="display: none">
-        <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
+    <svg class="hidden-svg">
+        <filter id="glass-distortion">
             <feTurbulence type="fractalNoise" baseFrequency="0.01 0.01" numOctaves="1" seed="5" result="turbulence" />
-            <feComponentTransfer in="turbulence" result="mapped">
-                <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5" />
-                <feFuncG type="gamma" amplitude="0" exponent="1" offset="0" />
-                <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5" />
-            </feComponentTransfer>
-            <feGaussianBlur in="turbulence" stdDeviation="3" result="softMap" />
-            <feSpecularLighting in="softMap" surfaceScale="5" specularConstant="1" specularExponent="100" lighting-color="white" result="specLight">
-                <fePointLight x="-200" y="-200" z="300" />
-            </feSpecularLighting>
-            <feComposite in="specLight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litImage" />
-            <feDisplacementMap in="SourceGraphic" in2="softMap" scale="150" xChannelSelector="R" yChannelSelector="G" />
+            <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="20" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+
+        <filter id="mini-liquid-lens" x="-50%" y="-50%" width="200%" height="200%">
+            <feImage x="0" y="0" result="normalMap" xlink:href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><radialGradient id='invmap' cx='50%' cy='50%' r='75%'><stop offset='0%' stop-color='rgb(128,128,255)'/><stop offset='90%' stop-color='rgb(255,255,255)'/></radialGradient><rect width='100%' height='100%' fill='url(#invmap)'/></svg>" />
+            <feDisplacementMap in="SourceGraphic" in2="normalMap" scale="-252" xChannelSelector="R" yChannelSelector="G" result="displaced" />
         </filter>
     </svg>
-    </body>
+
+    <script>
+        (() => {
+            const slider = document.getElementById('slider');
+            const progress = document.getElementById('progress');
+            const thumb = document.getElementById('thumb');
+            const bg = document.getElementById('bg');
+
+            let isDragging = false;
+            let sliderRect = slider.getBoundingClientRect();
+
+            const updateValue = (percent) => {
+                percent = Math.max(0, Math.min(100, percent));
+                
+                // Slider Grafik Update
+                progress.style.width = `${percent}%`;
+                thumb.style.left = `${percent}%`;
+
+                // Hintergrundfarbe Logik: 0% = Schwarz, 100% = Grau (#606060)
+                // RGB Wert von 0 (Schwarz) bis 96 (Grau)
+                const colorValue = Math.floor((percent / 100) * 96);
+                bg.style.backgroundColor = `rgb(${colorValue}, ${colorValue}, ${colorValue})`;
+            };
+
+            const onMove = (clientX) => {
+                const offsetX = clientX - sliderRect.left;
+                const percent = (offsetX / sliderRect.width) * 100;
+                updateValue(percent);
+            };
+
+            const startDrag = (e) => {
+                isDragging = true;
+                sliderRect = slider.getBoundingClientRect();
+                thumb.classList.add('active');
+                onMove(e.clientX || e.touches[0].clientX);
+            };
+
+            const stopDrag = () => {
+                isDragging = false;
+                thumb.classList.remove('active');
+            };
+
+            thumb.addEventListener('mousedown', startDrag);
+            thumb.addEventListener('touchstart', startDrag);
+            
+            document.addEventListener('mousemove', (e) => { if(isDragging) onMove(e.clientX); });
+            document.addEventListener('touchmove', (e) => { if(isDragging) onMove(e.touches[0].clientX); });
+            document.addEventListener('mouseup', stopDrag);
+            document.addEventListener('touchend', stopDrag);
+
+            // Initialwert
+            updateValue(0);
+        })();
+    </script>
+</body>
 </html>
