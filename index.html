@@ -3,129 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liquid Glass Effekt - macOS Dock</title>
+    <title>Moon Studio - ApexPanel</title>
     <style>
-        /* CSS: STYLING & ANIMATION */
         body {
             padding: 0;
             margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             height: 100vh;
             background: url("https://media.istockphoto.com/id/1430511443/vector/christmas-mistletoe-foliage-and-berries-vector-seamless-pattern.jpg?s=612x612&w=0&k=20&c=oqxlH7ytgd5yjBQroACirJ1gH7Au1tq8gmsdeGd-Crk=") center center;
             background-size: 500px;
-            font-family: sans-serif;
-            font-weight: 300;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             animation: moveBackground 60s linear infinite;
+            overflow: hidden;
+            position: relative;
         }
 
-        .wrapper {
+        /* OBEN RECHTS: WEBSITE TITLE */
+        .header-title {
+            position: absolute;
+            top: 20px;
+            right: 30px;
             display: flex;
-            gap: 25px;
-            flex-direction: column;
-            justify-content: center;
-            align-items: flex-end;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        .moon-icon {
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            box-shadow: -5px 2px 0 0 #333 inset; /* Erzeugt einen Sichel-Effekt */
+        }
+
+        /* OBEN LINKS: WRAPPER */
+        .wrapper {
+            position: absolute;
+            top: 40px;
+            left: 40px;
         }
 
         .liquidGlass-wrapper {
             position: relative;
             display: flex;
-            font-weight: 600;
+            flex-direction: column;
+            width: 300px; /* Viereckige Breite */
+            min-height: 200px;
             overflow: hidden;
-            box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.1);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-radius: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .liquidGlass-wrapper:hover {
+            transform: scale(1.02);
         }
 
         .liquidGlass-effect {
             position: absolute;
             z-index: 0;
             inset: 0;
-            backdrop-filter: blur(3px);
+            backdrop-filter: blur(8px);
             filter: url(#glass-distortion);
-            overflow: hidden;
         }
 
         .liquidGlass-tint {
             z-index: 1;
             position: absolute;
             inset: 0;
-            background: rgba(255, 255, 255, 0.50);
+            background: rgba(255, 255, 255, 0.4);
         }
 
         .liquidGlass-shine {
             position: absolute;
             inset: 0;
             z-index: 2;
-            overflow: hidden;
-            box-shadow: inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5),
-                        inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5);
+            box-shadow: inset 1px 1px 2px rgba(255,255,255,0.6), 
+                        inset -1px -1px 2px rgba(0,0,0,0.1);
         }
 
-        .liquidGlass-text {
+        /* TEXT CONTENT */
+        .content {
+            position: relative;
             z-index: 3;
-            font-size: 2rem;
-            color: black;
-        }
-
-        .dock {
+            padding: 30px;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            border-radius: 2rem;
-            padding: 0.6rem;
+            flex-direction: column;
+            gap: 15px;
+            color: #1a1a1a;
         }
 
-        .dock,
-        .dock > div {
-            border-radius: 2rem;
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding-bottom: 5px;
         }
 
-        .dock:hover {
-            padding: 0.8rem;
-            border-radius: 2.5rem;
+        .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.6;
+            margin-bottom: 2px;
         }
 
-        .dock:hover > div {
-            border-radius: 2.5rem;
-        }
-
-        .dock img {
-            width: 75px;
-            padding: 0;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
-            cursor: pointer;
-        }
-
-        .dock img:hover {
-            transform: scale(0.95);
-            transform-origin: center center;
+        .value {
+            font-size: 1.1rem;
+            font-weight: 700;
         }
 
         @keyframes moveBackground {
             from { background-position: 0% 0%; }
             to { background-position: 0% -1500%; }
         }
-
-        a { text-decoration: none; }
     </style>
 </head>
 <body>
 
+    <div class="header-title">
+        <div class="moon-icon"></div>
+        <span>Moon Studio</span>
+    </div>
+
     <div class="wrapper">
-        <div class="liquidGlass-wrapper dock">
+        <div class="liquidGlass-wrapper">
             <div class="liquidGlass-effect"></div>
             <div class="liquidGlass-tint"></div>
             <div class="liquidGlass-shine"></div>
-            <div class="liquidGlass-text">
-                <div class="dock">
-                    <img src="https://raw.githubusercontent.com/lucasromerodb/liquid-glass-effect-macos/refs/heads/main/assets/finder.png" alt="Finder" />
-                    <img src="https://raw.githubusercontent.com/lucasromerodb/liquid-glass-effect-macos/refs/heads/main/assets/map.png" alt="Maps" />
-                    <img src="https://raw.githubusercontent.com/lucasromerodb/liquid-glass-effect-macos/refs/heads/main/assets/messages.png" alt="Messages" />
-                    <img src="https://raw.githubusercontent.com/lucasromerodb/liquid-glass-effect-macos/refs/heads/main/assets/notes.png" alt="Notes" />
-                    <img src="https://raw.githubusercontent.com/lucasromerodb/liquid-glass-effect-macos/refs/heads/main/assets/safari.png" alt="Safari" />
-                    <img src="https://raw.githubusercontent.com/lucasromerodb/liquid-glass-effect-macos/refs/heads/main/assets/books.png" alt="Books" />
+            
+            <div class="content">
+                <div class="info-item">
+                    <span class="label">Product</span>
+                    <span class="value">ApexPanel Pro</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Version</span>
+                    <span class="value">ApexOS 1</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Product Cost</span>
+                    <span class="value">100 Robux</span>
                 </div>
             </div>
         </div>
@@ -133,18 +155,9 @@
 
     <svg style="display: none">
         <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
-            <feTurbulence type="fractalNoise" baseFrequency="0.01 0.01" numOctaves="1" seed="5" result="turbulence" />
-            <feComponentTransfer in="turbulence" result="mapped">
-                <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5" />
-                <feFuncG type="gamma" amplitude="0" exponent="1" offset="0" />
-                <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5" />
-            </feComponentTransfer>
-            <feGaussianBlur in="turbulence" stdDeviation="3" result="softMap" />
-            <feSpecularLighting in="softMap" surfaceScale="5" specularConstant="1" specularExponent="100" lighting-color="white" result="specLight">
-                <fePointLight x="-200" y="-200" z="300" />
-            </feSpecularLighting>
-            <feComposite in="specLight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litImage" />
-            <feDisplacementMap in="SourceGraphic" in2="softMap" scale="150" xChannelSelector="R" yChannelSelector="G" />
+            <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" seed="5" result="turbulence" />
+            <feGaussianBlur in="turbulence" stdDeviation="4" result="softMap" />
+            <feDisplacementMap in="SourceGraphic" in2="softMap" scale="20" xChannelSelector="R" yChannelSelector="G" />
         </filter>
     </svg>
 
