@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Moon Studio - ApexPanel</title>
+    <link rel="stylesheet" href="https://unpkg.com/normalize.css">
     <style>
+        /* BASE STYLES */
+        :root {
+            --bg-overlay: rgba(0, 0, 0, 0); /* Standard: Hell */
+        }
+
         body {
             padding: 0;
             margin: 0;
@@ -15,6 +21,23 @@
             animation: moveBackground 60s linear infinite;
             overflow: hidden;
             position: relative;
+        }
+
+        /* Dunkelheits-Overlay, gesteuert durch den Schalter */
+        body::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: black;
+            opacity: var(--bg-brightness, 0);
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            z-index: 1;
+        }
+
+        @keyframes moveBackground {
+            from { background-position: 0% 0%; }
+            to { background-position: 0% -1500%; }
         }
 
         /* OBEN RECHTS: WEBSITE TITLE */
@@ -40,11 +63,15 @@
             box-shadow: -5px 2px 0 0 #333 inset;
         }
 
-        /* OBEN LINKS: WRAPPER */
-        .wrapper {
+        /* LINKS: WRAPPER FÜR BEIDE FRAMES */
+        .left-container {
             position: absolute;
             top: 40px;
             left: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
         }
 
         .liquidGlass-wrapper {
@@ -52,19 +79,17 @@
             display: flex;
             flex-direction: column;
             width: 300px; 
-            min-height: 220px;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             border-radius: 2rem;
             transition: transform 0.3s ease;
         }
 
-        /* DER DURCHSICHTIGE EFFEKT */
         .liquidGlass-effect {
             position: absolute;
             z-index: 0;
             inset: 0;
-            backdrop-filter: blur(4px); /* Ein bisschen Blur für den Glaseffekt */
+            backdrop-filter: blur(4px);
             filter: url(#glass-distortion);
         }
 
@@ -72,7 +97,6 @@
             z-index: 1;
             position: absolute;
             inset: 0;
-            /* SEHR DURCHSICHTIG: nur 15% weiß */
             background: rgba(255, 255, 255, 0.15); 
         }
 
@@ -84,54 +108,51 @@
                         inset -1px -1px 1px 1px rgba(255, 255, 255, 0.2);
         }
 
-        /* TEXT CONTENT */
         .content {
             position: relative;
             z-index: 3;
-            padding: 30px;
+            padding: 25px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            color: #000; /* Schwarzer Text für besseren Kontrast auf hellem Glas */
+            gap: 15px;
+            color: #000;
         }
 
-        .info-item {
-            display: flex;
-            flex-direction: column;
+        .info-item { display: flex; flex-direction: column; }
+        .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; opacity: 0.5; }
+        .value { font-size: 1.1rem; font-weight: 700; }
+
+        /* TOGGLE BUTTON STYLE (Vom User-Script) */
+        .liquid-toggle {
+            --border: 4px;
+            --width: 100;
+            --height: 45;
+            height: calc(var(--height) * 1px);
+            width: calc(var(--width) * 1px);
+            border-radius: 100px;
+            border: 0;
+            cursor: pointer;
+            position: relative;
+            background: rgba(0,0,0,0.1);
         }
 
-        .label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: 800;
-            opacity: 0.5;
-        }
-
-        .value {
-            font-size: 1.2rem;
-            font-weight: 700;
-        }
-
-        @keyframes moveBackground {
-            from { background-position: 0% 0%; }
-            to { background-position: 0% -1500%; }
-        }
+        /* Importierte Toggle Logik Simulation */
+        [aria-pressed="true"] { --complete: 100; }
+        [aria-pressed="false"] { --complete: 0; }
     </style>
 </head>
-<body>
+<body data-theme="light">
 
     <div class="header-title">
         <div class="moon-icon"></div>
         <span>Moon Studio</span>
     </div>
 
-    <div class="wrapper">
+    <div class="left-container">
         <div class="liquidGlass-wrapper">
             <div class="liquidGlass-effect"></div>
             <div class="liquidGlass-tint"></div>
             <div class="liquidGlass-shine"></div>
-            
             <div class="content">
                 <div class="info-item">
                     <span class="label">Product</span>
@@ -147,16 +168,27 @@
                 </div>
             </div>
         </div>
+
+        <div class="liquidGlass-wrapper">
+            <div class="liquidGlass-effect"></div>
+            <div class="liquidGlass-tint"></div>
+            <div class="liquidGlass-shine"></div>
+            <div class="content">
+                <div class="info-item">
+                    <span class="label">Brightness:</span>
+                    <div style="margin-top: 10px;">
+                        <button id="brightnessToggle" aria-label="toggle" aria-pressed="false" class="liquid-toggle">
+                           <div style="position: absolute; top: 50%; left: var(--pos, 10%); transform: translateY(-50%); width: 35px; height: 35px; background: white; border-radius: 50%; transition: all 0.3s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <svg style="display: none">
         <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
             <feTurbulence type="fractalNoise" baseFrequency="0.01 0.01" numOctaves="1" seed="5" result="turbulence" />
-            <feComponentTransfer in="turbulence" result="mapped">
-                <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5" />
-                <feFuncG type="gamma" amplitude="0" exponent="1" offset="0" />
-                <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5" />
-            </feComponentTransfer>
             <feGaussianBlur in="turbulence" stdDeviation="3" result="softMap" />
             <feSpecularLighting in="softMap" surfaceScale="5" specularConstant="1" specularExponent="100" lighting-color="white" result="specLight">
                 <fePointLight x="-200" y="-200" z="300" />
@@ -166,5 +198,24 @@
         </filter>
     </svg>
 
+    <script>
+        const btn = document.getElementById('brightnessToggle');
+        btn.addEventListener('click', () => {
+            const isPressed = btn.getAttribute('aria-pressed') === 'true';
+            btn.setAttribute('aria-pressed', !isPressed);
+            
+            if(!isPressed) {
+                // AN (Dunkel)
+                btn.style.setProperty('--pos', '55%');
+                btn.style.background = '#444';
+                document.body.style.setProperty('--bg-brightness', '0.7');
+            } else {
+                // AUS (Hell)
+                btn.style.setProperty('--pos', '10%');
+                btn.style.background = 'rgba(0,0,0,0.1)';
+                document.body.style.setProperty('--bg-brightness', '0');
+            }
+        });
+    </script>
 </body>
 </html>
