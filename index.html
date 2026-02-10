@@ -28,7 +28,7 @@
             color: white;
             font-weight: 600;
             font-size: 1.2rem;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
             z-index: 10;
         }
 
@@ -37,7 +37,7 @@
             height: 20px;
             background-color: white;
             border-radius: 50%;
-            box-shadow: -5px 2px 0 0 #333 inset; /* Erzeugt einen Sichel-Effekt */
+            box-shadow: -5px 2px 0 0 #333 inset;
         }
 
         /* OBEN LINKS: WRAPPER */
@@ -51,23 +51,20 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            width: 300px; /* Viereckige Breite */
-            min-height: 200px;
+            width: 300px; 
+            min-height: 220px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 2rem;
             transition: transform 0.3s ease;
         }
 
-        .liquidGlass-wrapper:hover {
-            transform: scale(1.02);
-        }
-
+        /* DER DURCHSICHTIGE EFFEKT */
         .liquidGlass-effect {
             position: absolute;
             z-index: 0;
             inset: 0;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(4px); /* Ein bisschen Blur für den Glaseffekt */
             filter: url(#glass-distortion);
         }
 
@@ -75,15 +72,16 @@
             z-index: 1;
             position: absolute;
             inset: 0;
-            background: rgba(255, 255, 255, 0.4);
+            /* SEHR DURCHSICHTIG: nur 15% weiß */
+            background: rgba(255, 255, 255, 0.15); 
         }
 
         .liquidGlass-shine {
             position: absolute;
             inset: 0;
             z-index: 2;
-            box-shadow: inset 1px 1px 2px rgba(255,255,255,0.6), 
-                        inset -1px -1px 2px rgba(0,0,0,0.1);
+            box-shadow: inset 2px 2px 1px 0 rgba(255, 255, 255, 0.4),
+                        inset -1px -1px 1px 1px rgba(255, 255, 255, 0.2);
         }
 
         /* TEXT CONTENT */
@@ -93,27 +91,25 @@
             padding: 30px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            color: #1a1a1a;
+            gap: 20px;
+            color: #000; /* Schwarzer Text für besseren Kontrast auf hellem Glas */
         }
 
         .info-item {
             display: flex;
             flex-direction: column;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            padding-bottom: 5px;
         }
 
         .label {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.6;
-            margin-bottom: 2px;
+            letter-spacing: 1.5px;
+            font-weight: 800;
+            opacity: 0.5;
         }
 
         .value {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: 700;
         }
 
@@ -155,9 +151,18 @@
 
     <svg style="display: none">
         <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
-            <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" seed="5" result="turbulence" />
-            <feGaussianBlur in="turbulence" stdDeviation="4" result="softMap" />
-            <feDisplacementMap in="SourceGraphic" in2="softMap" scale="20" xChannelSelector="R" yChannelSelector="G" />
+            <feTurbulence type="fractalNoise" baseFrequency="0.01 0.01" numOctaves="1" seed="5" result="turbulence" />
+            <feComponentTransfer in="turbulence" result="mapped">
+                <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5" />
+                <feFuncG type="gamma" amplitude="0" exponent="1" offset="0" />
+                <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5" />
+            </feComponentTransfer>
+            <feGaussianBlur in="turbulence" stdDeviation="3" result="softMap" />
+            <feSpecularLighting in="softMap" surfaceScale="5" specularConstant="1" specularExponent="100" lighting-color="white" result="specLight">
+                <fePointLight x="-200" y="-200" z="300" />
+            </feSpecularLighting>
+            <feComposite in="specLight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litImage" />
+            <feDisplacementMap in="SourceGraphic" in2="softMap" scale="150" xChannelSelector="R" yChannelSelector="G" />
         </filter>
     </svg>
 
