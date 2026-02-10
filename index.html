@@ -5,15 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Moon Studio - ApexPanel</title>
     <style>
-        /* --- DEIN ORIGINAL SETUP --- */
+        /* --- SETUP OHNE BRIGHTNESS-LOGIK --- */
         @import url('https://unpkg.com/normalize.css') layer(normalize);
-        @layer normalize, base, demo, toggle, transitions, debug;
+        @layer normalize, base, demo, toggle, transitions;
 
         @layer base {
             :root {
                 --font-size-min: 16;
                 --font-size-max: 20;
-                --bg-darkness: 0;
             }
             body {
                 background: url("https://media.istockphoto.com/id/1430511443/vector/christmas-mistletoe-foliage-and-berries-vector-seamless-pattern.jpg?s=612x612&w=0&k=20&c=oqxlH7ytgd5yjBQroACirJ1gH7Au1tq8gmsdeGd-Crk=") center center;
@@ -23,17 +22,7 @@
                 font-family: 'SF Pro Text', system-ui, sans-serif;
                 animation: moveBackground 60s linear infinite;
                 overflow: hidden;
-            }
-            /* Helligkeits-Overlay Effekt direkt im Body */
-            body::after {
-                content: '';
-                position: fixed;
-                inset: 0;
-                background: black;
-                opacity: var(--bg-darkness);
-                pointer-events: none;
-                z-index: 5;
-                transition: opacity 0.4s ease;
+                /* KEINE BG-DARKNESS VARIABLE MEHR */
             }
             @keyframes moveBackground {
                 from { background-position: 0% 0%; }
@@ -49,10 +38,10 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            z-index: 20; /* Über dem Helligkeits-Overlay */
+            z-index: 100;
         }
 
-        /* --- LIQUID GLASS FRAMES (DEIN DESIGN) --- */
+        /* --- LIQUID GLASS FRAMES --- */
         .liquidGlass-wrapper {
             position: relative;
             width: 300px;
@@ -81,7 +70,7 @@
         .label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 900; opacity: 0.6; }
         .value { font-size: 1rem; font-weight: 800; }
 
-        /* --- DAS ORIGINAL TOGGLE SCRIPT CSS (UNVERÄNDERT) --- */
+        /* --- DEIN ORIGINAL TOGGLE CSS --- */
         @layer toggle {
             .liquid-toggle {
                 --unchecked: hsl(218, 8%, 81%);
@@ -149,8 +138,8 @@
         <div class="liquidGlass-wrapper">
             <div class="liquidGlass-effect"></div><div class="liquidGlass-tint"></div><div class="liquidGlass-shine"></div>
             <div class="content">
-                <span class="label">BRIGHTNESS:</span>
-                <button id="brightnessToggle" aria-label="toggle" aria-pressed="false" class="liquid-toggle">
+                <span class="label">TOGGLE SYSTEM:</span>
+                <button id="mainToggle" aria-label="toggle" aria-pressed="false" class="liquid-toggle">
                     <div class="indicator--masked"><div class="mask"></div></div>
                     <div class="indicator__liquid">
                         <div class="liquids"><div class="liquid__track"></div></div>
@@ -179,17 +168,15 @@
     <script type="module">
         import { Pane } from 'https://cdn.skypack.dev/tweakpane@4.0.4';
 
-        const toggle = document.getElementById('brightnessToggle');
+        const toggle = document.getElementById('mainToggle');
         const config = { complete: 0, hue: 144, bounce: true };
 
         const update = () => {
             toggle.style.setProperty('--complete', config.complete);
             toggle.style.setProperty('--hue', config.hue);
-            // Die Logik: Hintergrund abdunkeln basierend auf Toggle-Status
-            document.body.style.setProperty('--bg-darkness', (config.complete / 100) * 0.75);
+            // Helligkeits-Update gelöscht
         };
 
-        // Das Click-Event mit deiner elastic Logik
         toggle.addEventListener('click', () => {
             const isPressed = toggle.getAttribute('aria-pressed') === 'true';
             gsap.to(config, {
@@ -203,13 +190,12 @@
             });
         });
 
-        // Tweakpane Integration (oben rechts wie im Bild)
         const ctrl = new Pane({ title: 'config', expanded: true });
         ctrl.addBinding(config, 'complete', { min: 0, max: 100 }).on('change', update);
         ctrl.addBinding(config, 'hue', { min: 0, max: 359 }).on('change', update);
         ctrl.addBinding(config, 'bounce');
 
-        // Draggable Integration (Optional aber im Script enthalten)
+        // Draggable Integration
         gsap.registerPlugin(Draggable);
         const proxy = document.createElement('div');
         Draggable.create(proxy, {
