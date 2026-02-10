@@ -1,258 +1,233 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ApexOS - MoonStudio</title>
-    <style>
-        /* ORIGINALE STYLES & HIGH-END OPTIK */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
-
-        html { box-sizing: border-box; scroll-behavior: smooth; }
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: inherit; }
-
-        body {
-            font-family: "Inter", sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: #000; /* Startet schwarz */
-            color: white;
-            overflow: hidden;
-            transition: background-color 0.2s ease;
-            gap: 20px;
-        }
-
-        /* HEADER OBEN LINKS */
-        .header-top {
-            position: absolute;
-            top: 30px;
-            left: 30px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 600;
-            font-size: 1.2rem;
-            letter-spacing: 0.5px;
-        }
-
-        .moon-logo {
-            width: 28px;
-            height: 28px;
-            background-color: white;
-            /* Der Mond aus deinem Bild nachgebaut als Maske */
-            -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="black"/></svg>') no-repeat center;
-            mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="black"/></svg>') no-repeat center;
-        }
-
-        /* LIQUID GLASS CONTAINER (HAUPT-FRAME) */
-        .liquidGlass-wrapper {
-            position: relative;
-            width: 450px;
-            padding: 30px;
-            overflow: hidden;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border-radius: 2.5rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .liquidGlass-effect {
-            position: absolute;
-            z-index: 0;
-            inset: 0;
-            backdrop-filter: blur(8px);
-            filter: url(#glass-distortion);
-        }
-
-        .liquidGlass-tint {
-            z-index: 1;
-            position: absolute;
-            inset: 0;
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .liquidGlass-content {
-            position: relative;
-            z-index: 3;
-            width: 100%;
-            text-align: center;
-        }
-
-        .product-img {
-            width: 100%;
-            border-radius: 1.5rem;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-        }
-
-        .info-text {
-            font-size: 1.1rem;
-            line-height: 1.7;
-            font-weight: 300;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .info-text b { color: #49a3fc; font-weight: 600; }
-
-        /* REGLER FRAME (GLEICHES DESIGN) */
-        .slider-frame {
-            position: relative;
-            width: 450px;
-            padding: 25px;
-            border-radius: 2.5rem;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .slider-label {
-            position: relative;
-            z-index: 3;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-left: 10px;
-            color: rgba(255,255,255,0.7);
-        }
-
-        /* REGLER ORIGINAL CSS */
-        .slider-container {
-            position: relative;
-            z-index: 3;
-            width: 100%;
-            height: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 999px;
-            cursor: pointer;
-        }
-
-        .slider-progress {
-            position: absolute;
-            height: 100%;
-            background: linear-gradient(117deg, #49a3fc 0%, #3681ee 100%);
-            border-radius: 999px;
-            width: 0%;
-            z-index: 1;
-        }
-
-        .slider-thumb-glass {
-            position: absolute;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: 65px;
-            height: 42px;
-            border-radius: 999px;
-            cursor: pointer;
-            z-index: 2;
-            background-color: #fff;
-            box-shadow: 0 1px 8px 0 rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            transition: transform 0.15s ease;
-        }
-
-        .slider-thumb-glass-filter {
-            position: absolute; inset: 0; z-index: 0;
-            backdrop-filter: blur(0.6px);
-            filter: url(#mini-liquid-lens);
-            opacity: 0;
-        }
-
-        .slider-thumb-glass.active { background-color: transparent; }
-        .slider-thumb-glass.active .slider-thumb-glass-filter { opacity: 1; }
-
-        .slider-thumb-glass-specular {
-            position: absolute; inset: 0; z-index: 2;
-            border-radius: inherit;
-            box-shadow: inset 1px 1px 0 rgba(69, 168, 243, 0.2), inset 0 0 22px rgba(255,255,255,0.6);
-            opacity: 0;
-        }
-        .slider-thumb-glass.active .slider-thumb-glass-specular { opacity: 1; }
-
-        svg { width: 0; height: 0; position: absolute; }
-    </style>
-</head>
-<body id="bgBody">
-
-    <div class="header-top">
-        <div class="moon-logo"></div>
-        MoonStudio
-    </div>
-
-    <div class="liquidGlass-wrapper">
-        <div class="liquidGlass-effect"></div>
-        <div class="liquidGlass-tint"></div>
-        <div class="liquidGlass-content">
-            <img src="https://i.postimg.cc/T3PzWp8N/Apex-Panel-PRO.jpg" class="product-img" alt="Apex Panel PRO">
-            <div class="info-text">
-                Product: <b>ApexPanel</b><br>
-                Version: <b>ApexOS 1</b><br>
-                Product Cost: <b>100 Robux</b><br>
-                Release date: <b>2026</b>
+ <div class="wrapper">
+        <div class="liquidGlass-wrapper dock">
+          <div class="liquidGlass-effect"></div>
+          <div class="liquidGlass-tint"></div>
+          <div class="liquidGlass-shine"></div>
+          <div class="liquidGlass-text">
+            <div class="dock">
+              <img
+                src="https://raw.githubusercontent.com/lucasromerodb/liquid-glass-effect-macos/refs/heads/main/assets/finder.png"
+                alt="Finder"
+              />
+              <img
+                src="https://raw.githubusercontent.com/lucasromerodb/liquid-glass-effect-macos/refs/heads/main/assets/map.png"
+                alt="Finder"
+              />
+              <img
+                src="https://raw.githubusercontent.com/lucasromerodb/liquid-glass-effect-macos/refs/heads/main/assets/messages.png"
+                alt="Finder"
+              />
+              <img
+                src="https://raw.githubusercontent.com/lucasromerodb/liquid-glass-effect-macos/refs/heads/main/assets/notes.png"
+                alt="Finder"
+              />
+              <img
+                src="https://raw.githubusercontent.com/lucasromerodb/liquid-glass-effect-macos/refs/heads/main/assets/safari.png"
+                alt="Finder"
+              />
+              <img
+                src="https://raw.githubusercontent.com/lucasromerodb/liquid-glass-effect-macos/refs/heads/main/assets/books.png"
+                alt="Finder"
+              />
             </div>
+          </div>
         </div>
-    </div>
 
-    <div class="slider-frame">
-        <div class="liquidGlass-effect"></div>
-        <div class="liquidGlass-tint"></div>
-        <div class="slider-label">Background:</div>
-        <div class="slider-container" id="slider">
-            <div class="slider-progress" id="progress"></div>
-            <div class="slider-thumb-glass" id="thumb">
-                <div class="slider-thumb-glass-filter"></div>
-                <div class="slider-thumb-glass-specular"></div>
-            </div>
-        </div>
-    </div>
+    <svg style="display: none">
+      <filter
+        id="glass-distortion"
+        x="0%"
+        y="0%"
+        width="100%"
+        height="100%"
+        filterUnits="objectBoundingBox"
+      >
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.01 0.01"
+          numOctaves="1"
+          seed="5"
+          result="turbulence"
+        />
+        <!-- Seeds: 14, 17,  -->
 
-    <svg>
-        <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.01 0.01" numOctaves="1" seed="5" result="turb" />
-            <feDisplacementMap in="SourceGraphic" in2="turb" scale="20" />
-        </filter>
+        <feComponentTransfer in="turbulence" result="mapped">
+          <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5" />
+          <feFuncG type="gamma" amplitude="0" exponent="1" offset="0" />
+          <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5" />
+        </feComponentTransfer>
 
-        <filter id="mini-liquid-lens" x="-50%" y="-50%" width="200%" height="200%">
-            <feImage x="0" y="0" result="normalMap" xlink:href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><radialGradient id='invmap' cx='50%' cy='50%' r='75%'><stop offset='0%' stop-color='rgb(128,128,255)'/><stop offset='90%' stop-color='rgb(255,255,255)'/></radialGradient><rect width='100%' height='100%' fill='url(#invmap)'/></svg>" />
-            <feDisplacementMap in="SourceGraphic" in2="normalMap" scale="-252" xChannelSelector="R" yChannelSelector="G" />
-        </filter>
+        <feGaussianBlur in="turbulence" stdDeviation="3" result="softMap" />
+
+        <feSpecularLighting
+          in="softMap"
+          surfaceScale="5"
+          specularConstant="1"
+          specularExponent="100"
+          lighting-color="white"
+          result="specLight"
+        >
+          <fePointLight x="-200" y="-200" z="300" />
+        </feSpecularLighting>
+
+        <feComposite
+          in="specLight"
+          operator="arithmetic"
+          k1="0"
+          k2="1"
+          k3="1"
+          k4="0"
+          result="litImage"
+        />
+
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="softMap"
+          scale="150"
+          xChannelSelector="R"
+          yChannelSelector="G"
+        />
+      </filter>
     </svg>
 
-    <script>
-        (() => {
-            const slider = document.getElementById('slider');
-            const progress = document.getElementById('progress');
-            const thumb = document.getElementById('thumb');
-            const bgBody = document.getElementById('bgBody');
+     /* LIQUID GLASS STYLES */
 
-            let isDragging = false;
+.liquidGlass-wrapper {
+  position: relative;
+  display: flex;
+  font-weight: 600;
+  overflow: hidden;
 
-            const update = (clientX) => {
-                const rect = slider.getBoundingClientRect();
-                let percent = ((clientX - rect.left) / rect.width) * 100;
-                percent = Math.max(0, Math.min(100, percent));
+  box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.1);
 
-                progress.style.width = percent + '%';
-                thumb.style.left = percent + '%';
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
+}
 
-                // Hintergrund von Schwarz (0) bis Grau (96)
-                const val = Math.round((percent / 100) * 96);
-                bgBody.style.backgroundColor = `rgb(${val}, ${val}, ${val})`;
-            };
+.liquidGlass-effect {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
 
-            thumb.addEventListener('mousedown', () => { isDragging = true; thumb.classList.add('active'); });
-            window.addEventListener('mousemove', (e) => { if (isDragging) update(e.clientX); });
-            window.addEventListener('mouseup', () => { isDragging = false; thumb.classList.remove('active'); });
-            
-            slider.addEventListener('mousedown', (e) => update(e.clientX));
+  backdrop-filter: blur(3px);
+  filter: url(#glass-distortion);
+  overflow: hidden;
+}
 
-            // Startwert
-            update(slider.getBoundingClientRect().left);
-        })();
-    </script>
-</body>
-</html>
+.liquidGlass-tint {
+  z-index: 1;
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.50);
+}
+
+.liquidGlass-shine {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+
+  overflow: hidden;
+
+  box-shadow: inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5),
+    inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5);
+}
+
+.liquidGlass-text {
+  z-index: 3;
+  font-size: 2rem;
+  color: black;
+}
+
+/* OTHER STYLES */
+
+body {
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: url("https://media.istockphoto.com/id/1430511443/vector/christmas-mistletoe-foliage-and-berries-vector-seamless-pattern.jpg?s=612x612&w=0&k=20&c=oqxlH7ytgd5yjBQroACirJ1gH7Au1tq8gmsdeGd-Crk=")
+    center center;
+  background-size: 500px;
+  font-family: sans-serif;
+  font-weight: 300;
+
+  animation: moveBackground 60s linear infinite;
+}
+
+/*
+GREEN BACKGROUND
+https://media.istockphoto.com/id/1430511443/vector/christmas-mistletoe-foliage-and-berries-vector-seamless-pattern.jpg?s=612x612&w=0&k=20&c=oqxlH7ytgd5yjBQroACirJ1gH7Au1tq8gmsdeGd-Crk=
+
+ORANGE BACKGROUND
+https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/beautiful-orange-and-pastel-flowers-seamless-pattern-julien.jpg
+
+MARGARITAS BACKGROUND
+https://static.vecteezy.com/system/resources/previews/056/652/082/non_2x/hand-drawn-white-flower-seamless-pattern-floral-repeating-wallpaper-for-textile-design-fabric-print-wrapping-paper-cute-daisy-flowers-on-blue-background-repeated-ditsy-texture-vector.jpg
+
+SPRING FLOWERS BACKGROUND
+https://img.freepik.com/free-vector/flat-floral-spring-pattern-design_23-2150117078.jpg
+
+VECTOR WINDS BACKGROUND
+https://i.ibb.co/MDbLn4N4/vectors.png
+
+RED FLOWERS BACKGROUND
+https://www.publicdomainpictures.net/pictures/610000/velka/seamless-floral-wallpaper-art-1715193626Gct.jpg
+*/
+
+a {
+  text-decoration: none;
+}
+
+.wrapper {
+  display: flex;
+  gap: 25px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+
+.dock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 2rem;
+  padding: 0.6rem;
+}
+
+/* NOTE: You need to duplicate styles onto the child `div`s (`> div`) so that the glass wrapper and all the layers are affected in the same way.  */
+.dock,
+.dock > div {
+  border-radius: 2rem;
+}
+
+.dock:hover {
+  padding: 0.8rem;
+  border-radius: 2.5rem;
+}
+.dock:hover > div {
+  border-radius: 2.5rem;
+}
+
+.dock img {
+  width: 75px;
+  padding: 0;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
+  cursor: pointer;
+}
+
+.dock img:hover {
+  transform: scale(0.95);
+  transform-origin: center center;
+}
+
+@keyframes moveBackground {
+  from {
+    background-position: 0% 0%;
+  }
+  to {
+    background-position: 0% -1500%;
+  }
+}
