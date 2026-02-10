@@ -4,133 +4,181 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Moon Studio - ApexPanel</title>
-    <link rel="stylesheet" href="https://unpkg.com/normalize.css">
     <style>
-        /* DEIN BACKGROUND & BASICS */
-        body {
-            padding: 0;
-            margin: 0;
-            height: 100vh;
-            background: url("https://media.istockphoto.com/id/1430511443/vector/christmas-mistletoe-foliage-and-berries-vector-seamless-pattern.jpg?s=612x612&w=0&k=20&c=oqxlH7ytgd5yjBQroACirJ1gH7Au1tq8gmsdeGd-Crk=") center center;
-            background-size: 500px;
-            font-family: sans-serif;
-            animation: moveBackground 60s linear infinite;
-            overflow: hidden;
-            position: relative;
+        @import url('https://unpkg.com/normalize.css') layer(normalize);
+
+        @layer normalize, base, demo, toggle, transitions, debug;
+
+        @layer base {
+            :root {
+                --font-size-min: 16;
+                --font-size-max: 20;
+                --font-ratio-min: 1.2;
+                --font-ratio-max: 1.33;
+                --font-width-min: 375;
+                --font-width-max: 1500;
+                --bg-darkness: 0;
+            }
+
+            html { color-scheme: light dark; }
+
+            body {
+                background: url("https://media.istockphoto.com/id/1430511443/vector/christmas-mistletoe-foliage-and-berries-vector-seamless-pattern.jpg?s=612x612&w=0&k=20&c=oqxlH7ytgd5yjBQroACirJ1gH7Au1tq8gmsdeGd-Crk=") center center;
+                background-size: 500px;
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                min-height: 100vh;
+                margin: 0;
+                padding-left: 40px;
+                font-family: 'SF Pro Text', system-ui;
+                animation: moveBackground 60s linear infinite;
+                position: relative;
+                overflow: hidden;
+            }
+
+            body::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: black;
+                opacity: var(--bg-darkness);
+                transition: opacity 0.5s ease;
+                z-index: 1;
+                pointer-events: none;
+            }
+
+            @keyframes moveBackground {
+                from { background-position: 0% 0%; }
+                to { background-position: 0% -1500%; }
+            }
         }
 
-        /* DUNKLER OVERLAY EFFEKT */
-        .brightness-overlay {
-            position: fixed;
-            inset: 0;
-            background: black;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 1;
-            transition: opacity 0.4s ease;
-        }
-
-        /* OBEN RECHTS: WEBSITE TITLE */
-        .header-title {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: white;
-            font-weight: 600;
-            font-size: 1.2rem;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            z-index: 10;
-        }
-
-        .moon-icon {
-            width: 20px; height: 20px; background-color: white; border-radius: 50%;
-            box-shadow: -5px 2px 0 0 #333 inset;
-        }
-
-        /* CONTAINER FÜR DIE FRAMES LINKS */
-        .left-side {
-            position: absolute;
-            top: 40px;
-            left: 40px;
+        /* --- LIQUID GLASS FRAMES --- */
+        .left-container {
             display: flex;
             flex-direction: column;
             gap: 20px;
+            position: relative;
             z-index: 10;
         }
 
-        /* DAS LIQUID GLASS DESIGN */
         .liquidGlass-wrapper {
             position: relative;
-            display: flex;
-            flex-direction: column;
-            width: 320px; 
+            width: 320px;
+            border-radius: 2rem;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            border-radius: 2rem;
         }
 
         .liquidGlass-effect {
-            position: absolute; z-index: 0; inset: 0;
+            position: absolute;
+            inset: 0;
+            z-index: 0;
             backdrop-filter: blur(4px);
             filter: url(#glass-distortion);
         }
 
         .liquidGlass-tint {
-            z-index: 1; position: absolute; inset: 0;
-            background: rgba(255, 255, 255, 0.15); 
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.15);
         }
 
         .liquidGlass-shine {
-            position: absolute; inset: 0; z-index: 2;
+            position: absolute;
+            inset: 0;
+            z-index: 2;
             box-shadow: inset 2px 2px 1px 0 rgba(255, 255, 255, 0.4),
                         inset -1px -1px 1px 1px rgba(255, 255, 255, 0.2);
         }
 
         .content {
-            position: relative; z-index: 3; padding: 25px;
-            display: flex; flex-direction: column; gap: 15px; color: #000;
+            position: relative;
+            z-index: 3;
+            padding: 25px;
+            color: #000;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
         .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; opacity: 0.5; }
         .value { font-size: 1.1rem; font-weight: 700; }
 
-        @keyframes moveBackground {
-            from { background-position: 0% 0%; }
-            to { background-position: 0% -1500%; }
+        /* --- DEIN ORIGINAL TOGGLE CSS --- */
+        @layer toggle {
+            .liquid-toggle {
+                --unchecked: hsl(218, 8%, 81%);
+                --checked: hsl(var(--hue, 144), calc((8 + (var(--complete) / 100 * (92))) * 1%), calc((81 - (var(--complete) / 100 * (81 - 43))) * 1%));
+                --control: hsl(300, 100%, 100%);
+                --border: 5px; --width: 140; --height: 60;
+                height: calc(var(--height) * 1px); width: calc(var(--width) * 1px);
+                border-radius: 100px; border: 0; padding: 0; cursor: pointer;
+                position: relative; background: #0000; container-type: inline-size;
+                transition: outline var(--transition) var(--ease);
+            }
+
+            .indicator--masked {
+                border-radius: 100px; height: 100%; width: 100%;
+                background: var(--checked); position: absolute;
+                top: 50%; left: 50%; translate: -50% -50%;
+            }
+
+            .indicator--masked .mask {
+                position: absolute; height: calc(100% - (2 * var(--border)));
+                width: calc(60% - (2 * var(--border))); top: 50%;
+                background: #000; left: var(--border); border-radius: 100px;
+            }
+
+            .liquids {
+                position: absolute; inset: 0; border-radius: 100px;
+                overflow: hidden; filter: url(#goo);
+            }
+
+            .liquid__track {
+                height: calc((var(--height) * 1px)); width: calc((var(--width) * 1px));
+                background: var(--checked); border-radius: 100px; position: absolute; top: 50%;
+            }
+
+            .indicator__liquid {
+                position: absolute; height: calc(100% - (2 * var(--border)));
+                width: calc(60% - (2 * var(--border))); top: 50%;
+                left: var(--border); border-radius: 100px;
+            }
+
+            .indicator__liquid .cover { position: absolute; inset: 0; background: white; border-radius: 100px; }
+            
+            .indicator__liquid .shadow {
+                position: absolute; inset: 0; border-radius: 100px; opacity: 0;
+                box-shadow: 1px -1px 2px hsl(0 0% 100% / 0.5) inset, 3px 6px 16px -6px hsl(0 0% 30% / 0.5);
+            }
         }
 
-        /* --- START DEIN ORIGINAL BUTTON CSS --- */
-        .liquid-toggle {
-            --unchecked: hsl(218, 8%, 81%);
-            --checked: hsl(var(--hue, 144), calc((8 + (var(--complete) / 100 * (92))) * 1%), calc((81 - (var(--complete) / 100 * (81 - 43))) * 1%));
-            --border: 5px; --width: 120; --height: 55;
-            height: calc(var(--height) * 1px); width: calc(var(--width) * 1px);
-            border-radius: 100px; border: 0; padding: 0; cursor: pointer;
-            position: relative; background: #0000; container-type: inline-size;
+        @layer transitions {
+            :root { --transition: 0.2s; --ease: ease-out; }
+            .indicator--masked .mask {
+                translate: calc((var(--complete) / 100) * (100cqi - 60cqi)) -50%;
+                transition: all var(--transition) var(--ease);
+            }
+            .liquid__track {
+                translate: calc((var(--complete) / 100) * (100cqi - 100% - (6 * var(--border)))) -50%;
+                transition: all var(--transition) var(--ease);
+            }
+            .indicator__liquid {
+                translate: calc((var(--complete) / 100) * (100cqi - 100% - (2 * var(--border)))) -50%;
+                transition: scale var(--transition) var(--ease);
+            }
+            [data-active='true'] .indicator__liquid, .liquid-toggle:active .indicator__liquid { scale: 1.65; }
+            [data-active='true'] .indicator__liquid .cover, .liquid-toggle:active .indicator__liquid .cover { opacity: 0; }
+            [data-active='true'] .indicator__liquid .shadow, .liquid-toggle:active .indicator__liquid .shadow { opacity: 1; }
         }
-        .indicator--masked { background: var(--checked); z-index: 12; height: 100%; width: 100%; border-radius: 100px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        .indicator--masked .mask { position: absolute; height: calc(100% - (2 * var(--border))); width: calc(60% - (2 * var(--border))); top: 50%; background: #000; left: var(--border); border-radius: 100px; translate: calc((var(--complete) / 100) * (100cqi - 60cqi)) -50%; }
-        .indicator__liquid { position: absolute; height: calc(100% - (2 * var(--border))); width: calc(60% - (2 * var(--border))); top: 50%; left: var(--border); border-radius: 100px; translate: calc((var(--complete) / 100) * (100cqi - 100% - (2 * var(--border)))) -50%; z-index: 13; }
-        .indicator__liquid .cover { position: absolute; inset: 0; background: white; border-radius: 100px; opacity: 1; transition: opacity 0.2s; }
-        [aria-pressed="true"] .cover { opacity: 0; }
-        .liquids { position: absolute; inset: 0; filter: url(#goo); border-radius: 100px; overflow: hidden; }
-        .liquid__track { height: 100%; width: 200%; background: var(--checked); position: absolute; top: 50%; translate: 0 -50%; }
-        /* --- ENDE BUTTON CSS --- */
     </style>
 </head>
 <body>
 
-    <div class="brightness-overlay" id="overlay"></div>
-
-    <div class="header-title">
-        <div class="moon-icon"></div>
-        <span>Moon Studio</span>
-    </div>
-
-    <div class="left-side">
+    <div class="left-container">
         <div class="liquidGlass-wrapper">
             <div class="liquidGlass-effect"></div><div class="liquidGlass-tint"></div><div class="liquidGlass-shine"></div>
             <div class="content">
@@ -144,10 +192,15 @@
             <div class="liquidGlass-effect"></div><div class="liquidGlass-tint"></div><div class="liquidGlass-shine"></div>
             <div class="content">
                 <span class="label">BRIGHTNESS:</span>
-                <button id="mainToggle" aria-label="toggle" aria-pressed="false" class="liquid-toggle">
+                <button aria-label="toggle" aria-pressed="false" class="liquid-toggle">
                     <div class="indicator--masked"><div class="mask"></div></div>
                     <div class="indicator__liquid">
-                        <div class="liquids"><div class="liquid__track"></div></div>
+                        <div class="shadow"></div>
+                        <div class="wrapper">
+                            <div class="liquids">
+                                <div class="liquid__track"></div>
+                            </div>
+                        </div>
                         <div class="cover"></div>
                     </div>
                 </button>
@@ -155,42 +208,78 @@
         </div>
     </div>
 
-    <svg style="display: none">
-        <filter id="glass-distortion"><feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="1" seed="5"/><feDisplacementMap in="SourceGraphic" scale="150"/></filter>
-        <filter id="goo">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
-            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
-        </filter>
+    <svg class="sr-only" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <filter id="goo">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="13" result="blur" />
+                <feColorMatrix in="blur" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 13 -10" />
+            </filter>
+            <filter id="glass-distortion">
+                <feTurbulence type="fractalNoise" baseFrequency="0.01 0.01" numOctaves="1" seed="5" result="turbulence" />
+                <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="150" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+        </defs>
     </svg>
 
     <script src="https://cdn.skypack.dev/gsap@3.13.0"></script>
-    <script>
-        const toggle = document.getElementById('mainToggle');
-        const overlay = document.getElementById('overlay');
-        let complete = 0;
+    <script src="https://cdn.skypack.dev/gsap@3.13.0/Draggable"></script>
+    <script type="module">
+        import { Pane } from 'https://cdn.skypack.dev/tweakpane@4.0.4'
 
-        // Die Logik für deinen Button-Effekt
-        toggle.addEventListener('click', () => {
-            const isPressed = toggle.getAttribute('aria-pressed') === 'true';
-            const target = isPressed ? 0 : 100;
+        const toggle = document.querySelector('.liquid-toggle')
+        const config = { theme: 'light', complete: 0, active: false, hue: 144, bubble: true, bounce: true }
 
-            gsap.to(toggle, {
-                '--complete': target,
+        const update = () => {
+            toggle.style.setProperty('--complete', config.complete)
+            toggle.style.setProperty('--hue', config.hue)
+            document.body.style.setProperty('--bg-darkness', (config.complete / 100) * 0.7)
+        }
+
+        const toggleState = async () => {
+            const pressed = toggle.getAttribute('aria-pressed') === 'true'
+            toggle.dataset.pressed = true
+            if (config.bubble) toggle.dataset.active = true
+
+            gsap.to(config, {
+                complete: pressed ? 0 : 100,
                 duration: 0.6,
-                ease: "elastic.out(1, 0.3)",
-                onUpdate: () => {
-                    // Toggle Zustand während der Animation setzen
-                },
+                ease: config.bounce ? "elastic.out(1, 0.3)" : "power2.out",
+                onUpdate: update,
                 onComplete: () => {
-                    toggle.setAttribute('aria-pressed', !isPressed);
-                    // Hintergrund abdunkeln
-                    overlay.style.opacity = !isPressed ? "0.7" : "0";
+                    toggle.setAttribute('aria-pressed', !pressed)
+                    toggle.dataset.active = false
+                    toggle.dataset.pressed = false
                 }
-            });
-        });
+            })
+        }
 
-        // Initialer Hue
-        toggle.style.setProperty('--hue', '144');
+        toggle.addEventListener('click', toggleState)
+
+        const ctrl = new Pane({ title: 'config' })
+        ctrl.addBinding(config, 'complete', { min: 0, max: 100 }).on('change', update)
+        ctrl.addBinding(config, 'hue', { min: 0, max: 359 }).on('change', update)
+        ctrl.addBinding(config, 'bounce')
+
+        // Draggable-Teil deines Scripts
+        const proxy = document.createElement('div')
+        gsap.registerPlugin(Draggable)
+        Draggable.create(proxy, {
+            trigger: toggle,
+            onDrag: function() {
+                const range = 140 // Button Breite
+                let c = Math.max(0, Math.min(100, (this.x / range) * 100))
+                config.complete = c
+                update()
+            },
+            onDragEnd: function() {
+                config.complete = config.complete > 50 ? 100 : 0
+                const isNowPressed = config.complete === 100
+                toggle.setAttribute('aria-pressed', isNowPressed)
+                update()
+            }
+        })
+
+        update()
     </script>
 </body>
 </html>
