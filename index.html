@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS 26 Liquid Glass Preview</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+            --glass-color: rgba(255, 255, 255, 0.12);
+            --border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        /* Dynamischer Hintergrund für den Glaseffekt */
+        .background-blobs {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 20% 30%, #4facfe 0%, #00f2fe 100%);
+            filter: blur(80px);
+        }
+
+        /* Die Liquid Glass Karte */
+        .glass-card {
+            width: 280px;
+            height: 180px;
+            background: var(--glass-color);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid var(--border-color);
+            border-radius: 45px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+
+            /* Die iOS 26 "Liquid" Animation */
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform-origin: center;
+            user-select: none;
+        }
+
+        /* Hover-Effekt: Ausdehnen (Expansion) */
+        .glass-card:hover {
+            transform: scale(1.15) rotate(1deg);
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 55px; /* "Flüssiges" Abrunden */
+            box-shadow: 0 40px 80px rgba(0,0,0,0.25);
+        }
+
+        /* Active-Effekt: Leichtes Eindehnen beim Klicken */
+        .glass-card:active {
+            transform: scale(0.95);
+            transition: all 0.2s ease;
+        }
+
+        h1 { font-size: 1.4rem; margin-bottom: 5px; font-weight: 600; }
+        p { font-size: 0.9rem; opacity: 0.8; }
+
+    </style>
+</head>
+<body>
+
+    <div class="background-blobs"></div>
+
+    <div class="glass-card">
+        <h1>iOS 26</h1>
+        <p>Liquid Glass Test</p>
+    </div>
+
+</body>
+</html>
