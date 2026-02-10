@@ -3,80 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>iOS 26 Liquid Drag UI</title>
+    <title>iOS 26 Ultra-Smooth Drag</title>
     <style>
         :root {
             --ios-blur: blur(60px) saturate(210%) brightness(1.1);
-            --liquid-easing: cubic-bezier(0.34, 1.56, 0.64, 1);
+            /* Apples geheime Kurve für 2026 */
+            --apple-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            background: url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1920&auto=format&fit=crop') center/cover;
+            background: #000 url('https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?q=80&w=1920&auto=format&fit=crop') center/cover;
             font-family: -apple-system, sans-serif;
             overflow: hidden; display: flex; flex-direction: column;
             justify-content: center; align-items: center;
-            touch-action: none; /* Verhindert Standard-Scrollen auf Handys */
+            touch-action: none;
         }
 
         .glass-canvas {
             position: absolute; inset: 0;
             backdrop-filter: var(--ios-blur); -webkit-backdrop-filter: var(--ios-blur);
-            background: rgba(255, 255, 255, 0.05); z-index: 1;
+            background: rgba(255, 255, 255, 0.03); z-index: 1;
         }
 
         /* Haupt-Anzeige */
         .content-wrapper {
-            position: relative; z-index: 10; width: 280px; height: 280px;
-            overflow: hidden; border-radius: 60px;
+            position: relative; z-index: 10; width: 300px; height: 300px;
+            overflow: hidden; border-radius: 65px;
+            mask-image: -webkit-radial-gradient(white, black); /* Fix für abgerundete Ecken & Blur */
         }
 
         .content-slider {
             display: flex; width: 300%; height: 100%;
-            transition: transform 0.6s var(--liquid-easing);
+            transition: transform 0.8s var(--apple-ease);
         }
 
         .page {
             width: 100%; height: 100%; display: flex; justify-content: center;
-            align-items: center; font-size: 6rem;
+            align-items: center; font-size: 7rem;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
         }
 
         /* Navigations-Leiste */
         .nav-container {
             position: relative; z-index: 20; margin-top: 60px;
-            background: rgba(0, 0, 0, 0.1); padding: 10px;
-            border-radius: 40px; display: flex; gap: 5px;
-            backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1);
-            width: 320px; justify-content: space-between;
+            background: rgba(255, 255, 255, 0.08); padding: 8px;
+            border-radius: 40px; display: flex; gap: 0;
+            backdrop-filter: blur(30px); border: 0.5px solid rgba(255, 255, 255, 0.2);
+            width: 340px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
 
         .nav-item {
-            flex: 1; padding: 15px 0; text-align: center;
-            color: rgba(255, 255, 255, 0.4); font-weight: 600;
-            z-index: 25; pointer-events: none; transition: color 0.3s;
+            flex: 1; padding: 18px 0; text-align: center;
+            color: rgba(255, 255, 255, 0.3); font-weight: 600;
+            font-size: 0.95rem; z-index: 25; pointer-events: none;
+            transition: color 0.4s ease, transform 0.4s var(--apple-ease);
         }
 
-        .nav-item.active { color: white; }
+        .nav-item.active { color: white; transform: scale(1.05); }
 
-        /* Der Liquid Regler */
+        /* Der Apple Liquid Regler */
         .liquid-pill {
-            position: absolute; top: 10px; left: 10px;
-            height: calc(100% - 20px); width: 100px;
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: 30px; z-index: 22;
+            position: absolute; top: 8px; left: 8px;
+            height: calc(100% - 16px); width: 106px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px) brightness(1.2);
+            -webkit-backdrop-filter: blur(15px) brightness(1.2);
+            border: 0.5px solid rgba(255, 255, 255, 0.4);
+            border-radius: 32px; z-index: 22;
             cursor: grab;
-            transition: transform 0.3s var(--liquid-easing), background 0.3s, left 0.4s var(--liquid-easing);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            /* Keine Transition für 'left' beim Dragging, wir machen das per JS */
         }
 
-        /* Wenn gedrückt gehalten wird */
-        .liquid-pill.dragging {
-            transform: scale(1.08) translateY(-2px);
-            background: rgba(255, 255, 255, 0.4);
-            cursor: grabbing;
-            transition: transform 0.2s, background 0.2s; /* Schneller beim Drücken */
+        .liquid-pill.active-state {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scaleX(1.1) scaleY(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
 
     </style>
@@ -107,65 +110,61 @@
         const items = document.querySelectorAll('.nav-item');
 
         let isDragging = false;
-        let startX = 0;
-        let currentPillLeft = 10;
-        const pillWidth = 100;
+        let targetX = 8;  // Wo der Regler hin will
+        let currentX = 8; // Wo der Regler gerade ist (für Glättung)
+        let dragOffset = 0;
 
-        // Hilfsfunktion: Position einrasten
-        function snapTo(index) {
-            const positions = [10, 110, 210]; // Die Linken Positionen der Buttons
-            const finalPos = positions[index];
-            pill.style.left = finalPos + 'px';
-            slider.style.transform = `translateX(-${index * 33.333}%)`;
-            
-            items.forEach((item, i) => {
-                item.classList.toggle('active', i === index);
-            });
+        // Die magische "Smooth-Follow" Funktion (Lerp)
+        function updatePhysic() {
+            // Jede Frame nähert sich currentX zu 15% an targetX an
+            let dx = targetX - currentX;
+            currentX += dx * 0.15; 
+
+            pill.style.left = currentX + 'px';
+
+            // Fortschritt für den Slider oben berechnen (0 bis 220px)
+            let progress = (currentX - 8) / 212;
+            slider.style.transform = `translateX(-${progress * 66.666}%)`;
+
+            requestAnimationFrame(updatePhysic);
         }
+        updatePhysic(); // Startet die Physik-Engine
 
-        // Event-Handler für Maus und Touch
         function onStart(e) {
             isDragging = true;
-            pill.classList.add('dragging');
-            startX = (e.pageX || e.touches[0].pageX) - pill.offsetLeft;
+            pill.classList.add('active-state');
+            const clientX = e.pageX || e.touches[0].pageX;
+            dragOffset = clientX - currentX;
         }
 
         function onMove(e) {
             if (!isDragging) return;
-            e.preventDefault();
+            const clientX = e.pageX || e.touches[0].pageX;
+            let x = clientX - dragOffset;
 
-            let x = (e.pageX || e.touches[0].pageX) - startX;
-            
-            // Begrenzung innerhalb der Bar
-            const minX = 10;
-            const maxX = navBar.offsetWidth - pill.offsetWidth - 10;
-            if (x < minX) x = minX;
+            // Grenzen einhalten
+            const maxX = navBar.offsetWidth - pill.offsetWidth - 8;
+            if (x < 8) x = 8;
             if (x > maxX) x = maxX;
 
-            pill.style.transition = 'none'; // Keine Verzögerung beim Ziehen
-            pill.style.left = x + 'px';
-
-            // Live-Feedback für das obere UI (optionaler Parallax-Effekt)
-            let progress = (x - 10) / (maxX - 10);
-            slider.style.transition = 'none';
-            slider.style.transform = `translateX(-${progress * 66.666}%)`;
+            targetX = x; // Wir setzen nur das Ziel, die Physik macht den Rest
         }
 
         function onEnd() {
             if (!isDragging) return;
             isDragging = false;
-            pill.classList.remove('dragging');
-            pill.style.transition = 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
-            slider.style.transition = 'transform 0.6s var(--liquid-easing)';
+            pill.classList.remove('active-state');
 
-            // Berechnen, welcher Button am nächsten ist
-            const x = pill.offsetLeft;
-            if (x < 60) snapTo(0);
-            else if (x < 160) snapTo(1);
-            else snapTo(2);
+            // Snapping: Welcher Bereich ist am nächsten?
+            if (targetX < 60) targetX = 8;
+            else if (targetX < 165) targetX = 114;
+            else targetX = 224;
+
+            // Active State Text
+            const index = targetX === 8 ? 0 : (targetX === 114 ? 1 : 2);
+            items.forEach((item, i) => item.classList.toggle('active', i === index));
         }
 
-        // Event Listener
         pill.addEventListener('mousedown', onStart);
         window.addEventListener('mousemove', onMove);
         window.addEventListener('mouseup', onEnd);
